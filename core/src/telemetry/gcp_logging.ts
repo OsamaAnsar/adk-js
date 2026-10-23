@@ -6,7 +6,8 @@
 
 /**
  * Exports OpenTelemetry log records to Cloud Logging through the OTLP endpoint
- * of `telemetry.googleapis.com`.
+ * of `telemetry.googleapis.com`, and holds the endpoint and credential helpers
+ * that trace and metric export share with it.
  */
 
 import {OTLPLogExporter} from '@opentelemetry/exporter-logs-otlp-http';
@@ -30,6 +31,22 @@ export const DEFAULT_TELEMETRY_LOGS_ENDPOINT =
 /** mTLS OTLP/HTTP logs endpoint of `telemetry.googleapis.com`. */
 export const DEFAULT_MTLS_TELEMETRY_LOGS_ENDPOINT =
   'https://telemetry.mtls.googleapis.com/v1/logs';
+
+/** Plain OTLP/HTTP traces endpoint of `telemetry.googleapis.com`. */
+export const DEFAULT_TELEMETRY_TRACES_ENDPOINT =
+  'https://telemetry.googleapis.com/v1/traces';
+
+/** mTLS OTLP/HTTP traces endpoint of `telemetry.googleapis.com`. */
+export const DEFAULT_MTLS_TELEMETRY_TRACES_ENDPOINT =
+  'https://telemetry.mtls.googleapis.com/v1/traces';
+
+/** Plain OTLP/HTTP metrics endpoint of `telemetry.googleapis.com`. */
+export const DEFAULT_TELEMETRY_METRICS_ENDPOINT =
+  'https://telemetry.googleapis.com/v1/metrics';
+
+/** mTLS OTLP/HTTP metrics endpoint of `telemetry.googleapis.com`. */
+export const DEFAULT_MTLS_TELEMETRY_METRICS_ENDPOINT =
+  'https://telemetry.mtls.googleapis.com/v1/metrics';
 
 /**
  * OAuth scope the exporter authenticates with. A service-account key has no
@@ -285,10 +302,11 @@ export interface CreateGcpLogRecordProcessorParams {
 }
 
 /**
- * Returns the request headers for one export. Never throws, because the OTLP
- * exporter requires a headers factory that does not.
+ * Returns the request headers for one export to `telemetry.googleapis.com`.
+ * Never throws, because the OTLP exporters require a headers factory that
+ * does not.
  */
-async function authorizationHeaders(
+export async function authorizationHeaders(
   auth: Pick<GoogleAuth, 'getRequestHeaders'>,
 ): Promise<Record<string, string>> {
   try {
@@ -299,9 +317,7 @@ async function authorizationHeaders(
     return headers;
   } catch {
     // The error text can carry credential details, so it is not logged.
-    logger.warn(
-      'Failed to get Google Cloud credentials for Cloud Logging export.',
-    );
+    logger.warn('Failed to get Google Cloud credentials for telemetry export.');
     return {};
   }
 }
