@@ -9,7 +9,7 @@ import {logs} from '@opentelemetry/api-logs';
 import {OTLPLogExporter} from '@opentelemetry/exporter-logs-otlp-http';
 import {OTLPMetricExporter} from '@opentelemetry/exporter-metrics-otlp-http';
 import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http';
-import {detectResources, Resource} from '@opentelemetry/resources';
+import {detectResources, envDetector, Resource} from '@opentelemetry/resources';
 import {
   BatchLogRecordProcessor,
   LoggerProvider,
@@ -108,12 +108,13 @@ export function maybeSetOtelProviders(
  *
  * The resource detection populates resource labels from
  * environment variables like OTEL_SERVICE_NAME and OTEL_RESOURCE_ATTRIBUTES.
+ * No SDK default attributes are added.
  *
  * @returns A Resource object with detected attributes
  */
 function getOtelResource(): Resource {
   return detectResources({
-    detectors: [],
+    detectors: [envDetector],
   });
 }
 
